@@ -39,8 +39,12 @@ Overriding the default is only permitted in the root module.
 def _oci_extension(module_ctx):
     root_direct_deps = []
     root_direct_dev_deps = []
+    reproducible = True
     for mod in module_ctx.modules:
         for pull in mod.tags.pull:
+            if not pull.reproducible or not pull.digest:
+                reproducible = False
+
             oci_pull(
                 name = pull.name,
                 image = pull.image,
@@ -80,6 +84,7 @@ def _oci_extension(module_ctx):
     return module_ctx.extension_metadata(
         root_module_direct_deps = root_direct_deps,
         root_module_direct_dev_deps = root_direct_dev_deps,
+        reproducible = reproducible,
     )
 
 oci = module_extension(
